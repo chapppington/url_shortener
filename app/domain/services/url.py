@@ -20,7 +20,7 @@ class URLService:
 
         new_id = uuid4()
 
-        short_url = base62.encode(new_id)
+        short_url = base62.encode(new_id.int)
 
         new_pair = URLEntity(
             id=new_id,
@@ -33,9 +33,9 @@ class URLService:
         return short_url
 
     async def get_long_url(self, short_url: str) -> str:
-        pair = await self.url_repository.get_by_short_url(short_url)
+        long_url = await self.url_repository.get_by_short_url(short_url)
 
-        if not pair:
+        if not long_url:
             raise LongURLNotFoundException(short_url=short_url)
 
-        return pair.long_url
+        return long_url
