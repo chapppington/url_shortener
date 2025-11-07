@@ -1,11 +1,11 @@
-import base62
-
+from dataclasses import dataclass
 from uuid import uuid4
 
-from dataclasses import dataclass
+import base62
+
 from domain.entities.url import URLEntity
-from domain.interfaces.repositories.url import BaseURLRepository
 from domain.exceptions.url import LongURLNotFoundException
+from domain.interfaces.repositories.url import BaseURLRepository
 
 
 @dataclass

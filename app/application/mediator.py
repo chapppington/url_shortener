@@ -3,7 +3,10 @@ from dataclasses import (
     dataclass,
     field,
 )
-from typing import Any, Iterable
+from typing import (
+    Any,
+    Iterable,
+)
 
 from application.commands.base import (
     BaseCommand,
