@@ -5,5 +5,5 @@ from domain.entities.base import BaseEntity
 
 @dataclass
 class URLEntity(BaseEntity):
-    shortURL: str
-    longURL: str
+    short_url: str
+    long_url: str

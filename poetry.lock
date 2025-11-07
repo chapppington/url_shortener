@@ -1164,6 +1164,17 @@ files = [
 ]
 
 [[package]]
+name = "pybase62"
+version = "1.0.0"
+description = "Python module for base62 encoding"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "pybase62-1.0.0-py3-none-any.whl", hash = "sha256:60539ad956ec9e9de091bc7ae88c9550bc2fa17f503050cf34d021b75e73cb27"},
+]
+
+[[package]]
 name = "pycparser"
 version = "2.23"
 description = "C parser in Python"
@@ -1851,4 +1862,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13, <4.0"
-content-hash = "dd376dc9dbcdbb2e473baf2e77d3907fa199adea62ac7bd57ac9ad489751ea76"
+content-hash = "3e5ab0816c66b9eb6cadffe6be57b158ce5aabdbeefadfe2f64af91a0e8d5972"
