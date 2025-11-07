@@ -17,7 +17,7 @@ async def make_request(
 ) -> tuple[float, int]:
     start_time = time.time()
     try:
-        response = await client.get(f"{url}/api/v1/urls/{short_url}")
+        response = await client.get(f"{url}/urls/{short_url}")
         elapsed = time.time() - start_time
         return elapsed, response.status_code
     except Exception as e:
@@ -33,7 +33,7 @@ async def run_load_test(
     concurrent_requests: int,
 ):
     print("Starting load test:")
-    print(f"  URL: {base_url}/api/v1/urls/{short_url}")
+    print(f"  URL: {base_url}/urls/{short_url}")
     print(f"  Total requests: {total_requests}")
     print(f"  Concurrent requests: {concurrent_requests}")
     print()

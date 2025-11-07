@@ -13,5 +13,5 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(healthcheck_router)
-    app.include_router(v1_router, prefix="/api/v1")
+    app.include_router(v1_router)
     return app
