@@ -20,7 +20,11 @@ class URLService:
 
         new_id = uuid4()
 
-        short_url = base62.encode(new_id.int)
+        # Просто используем числовое представление UUID (обрезаем если нужно)
+        numeric_value = new_id.int & ((1 << 48) - 1)  # Берем младшие 48 бит
+
+        # Кодируем в base62
+        short_url = base62.encode(numeric_value)
 
         new_pair = URLEntity(
             id=new_id,
