@@ -1,0 +1,70 @@
+[project]
+name = "url-shortener"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "chapppington",email = "stas.mega.96@bk.ru"}
+]
+readme = "README.md"
+requires-python = ">=3.13, <4.0"
+dependencies = [
+    "fastapi (>=0.121.0,<0.122.0)",
+    "punq (>=0.7.0,<0.8.0)",
+    "alembic (>=1.17.1,<2.0.0)",
+    "sqlalchemy (>=2.0.44,<3.0.0)",
+    "uvicorn (>=0.38.0,<0.39.0)",
+    "greenlet (>=3.2.4,<4.0.0)",
+    "bcrypt (>=5.0.0,<6.0.0)",
+    "asyncpg (>=0.30.0,<0.31.0)",
+    "pydantic (>=2.12.4,<3.0.0)",
+    "pydantic-settings (>=2.11.0,<3.0.0)",
+    "black (>=25.9.0,<26.0.0)",
+    "orjson (>=3.11.4,<4.0.0)",
+    "authx (>=1.4.3,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.2"
+pytest-asyncio = "^1.2.0"
+pytest-cov = "^7.0.0"
+isort = "^7.0.0"
+faker = "^37.12.0"
+pre-commit = "^4.3.0"
+
+[tool.isort]
+multi_line_output=3
+include_trailing_comma=true
+line_length=120
+lines_after_imports=2
+lines_between_sections=1
+lines_between_types=0
+force_alphabetical_sort_within_sections=true
+ensure_newline_before_comments=true
+combine_as_imports=true
+combine_star=true
+skip_gitignore=true
+balanced_wrapping=true
+force_grid_wrap=2
+src_paths=["core", ]
+skip_glob=[
+    ".git",
+    ".idea",
+    ".vscode",
+    "venv",
+    ".venv",
+]
+known_fastapi=["fastapi","starlette"]
+known_first_party=["presentation","domain","infrastructure","application","settings","tests"]
+sections=[
+    "FUTURE",
+    "STDLIB",
+    "FASTAPI",
+    "THIRDPARTY",
+    "FIRSTPARTY",
+    "LOCALFOLDER",
+]
