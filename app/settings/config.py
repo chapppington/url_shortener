@@ -34,6 +34,16 @@ class Config(BaseSettings):
         alias="POSTGRES_HOST",
     )
 
+    redis_port: int = Field(
+        default=6379,
+        alias="REDIS_PORT",
+    )
+
+    redis_host: str = Field(
+        default="localhost",
+        alias="REDIS_HOST",
+    )
+
     @computed_field
     @property
     def postgres_connection_uri(self) -> str:

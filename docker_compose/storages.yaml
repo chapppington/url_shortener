@@ -29,7 +29,7 @@ services:
     container_name: redis
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -46,7 +46,7 @@ services:
     container_name: redisinsight
     image: redis/redisinsight:latest
     ports:
-      - "5540:5540"
+      - "${REDISINSIGHT_PORT}:5540"
     volumes:
       - redisinsight_data:/data
     networks:
