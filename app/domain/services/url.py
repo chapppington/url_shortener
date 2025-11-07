@@ -1,4 +1,7 @@
 import base62
+
+from uuid import uuid4
+
 from dataclasses import dataclass
 from domain.entities.url import URLEntity
 from domain.interfaces.repositories.url import BaseURLRepository
@@ -15,9 +18,12 @@ class URLService:
         if existing_pair:
             return existing_pair.short_url
 
-        short_url = base62.encode(long_url)
+        new_id = uuid4()
+
+        short_url = base62.encode(new_id)
 
         new_pair = URLEntity(
+            id=new_id,
             long_url=long_url,
             short_url=short_url,
         )
