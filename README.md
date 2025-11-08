@@ -168,6 +168,11 @@ make test
 
 Приложение интегрировано с **Elastic APM** для мониторинга производительности и отслеживания ошибок.
 
+<img width="1728" height="914" alt="Снимок экрана 2025-11-08 в 09 53 16" src="https://github.com/user-attachments/assets/835f9d8a-f62a-47e5-9c0b-661beb78dafd" />
+
+<img width="1725" height="992" alt="Снимок экрана 2025-11-08 в 09 53 07" src="https://github.com/user-attachments/assets/8fc36a35-1edd-4d0a-b511-a1c1cc019cbe" />
+
+
 ### Возможности мониторинга
 
 - **Трассировка запросов** - отслеживание времени выполнения запросов и их компонентов (app, PostgreSQL, Redis)
