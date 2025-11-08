@@ -41,6 +41,7 @@ REST API для сокращения URL, построенное на принц
 - **CQRS** - разделение команд и запросов через Mediator
 - **Repository Pattern** - абстракция работы с данными
 - **Dependency Injection** - через punq контейнер
+- **Value Objects** - валидация доменных объектов (URL)
 
 ## Запуск проекта
 
@@ -79,6 +80,39 @@ make migrate
 После запуска API документация доступна по адресу:
 - Swagger UI: `http://localhost:8000/api/docs`
 
+### Формат ответов
+
+Все ответы API возвращаются в едином формате `ApiResponse`:
+
+**Успешный ответ:**
+```json
+{
+  "data": {
+    "short_url": "abc123"
+  },
+  "meta": {},
+  "errors": []
+}
+```
+
+**Ответ с ошибкой:**
+```json
+{
+  "data": {},
+  "meta": {},
+  "errors": ["URL must include a scheme (e.g., http:// or https://)"]
+}
+```
+
+### Валидация URL
+
+При создании короткой ссылки URL валидируется по следующим правилам:
+- URL не может быть пустым
+- URL должен содержать схему (`http://` или `https://`)
+- URL должен содержать домен (например, `example.com`)
+- Поддерживаются только схемы `http` и `https`
+- Максимальная длина URL: 2048 символов
+
 ### Эндпоинты
 
 - `POST /api/v1/urls` - создание короткой ссылки
@@ -87,8 +121,14 @@ make migrate
     "long_url": "https://example.com"
   }
   ```
+  **Примеры ошибок:**
+  - Пустой URL: `{"errors": ["URL cannot be empty"]}`
+  - URL без схемы: `{"errors": ["Invalid URL 'example.com': URL must include a scheme (e.g., http:// or https://)"]}`
+  - Неподдерживаемая схема: `{"errors": ["Invalid URL 'ftp://example.com': Unsupported scheme 'ftp'. Only http and https are allowed"]}`
 
 - `GET /api/v1/urls/{short_url}` - получение длинной ссылки по короткой
+  **Пример ошибки:**
+  - URL не найден: `{"errors": ["Long URL not found for short URL: abc123"]}`
 
 ## Тестирование
 
