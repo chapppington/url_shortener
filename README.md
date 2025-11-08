@@ -21,12 +21,16 @@ REST API для сокращения URL, построенное на принц
 - **punq** - DI контейнер
 - **Redis** - кэширование
 - **base62** - кодирование URL
+- **Elastic APM** - мониторинг производительности и отслеживание ошибок
 
 ### Инфраструктура
 - **PostgreSQL** - основная база данных
 - **Redis** - кэш
 - **pgAdmin** - администрирование PostgreSQL
 - **RedisInsight** - администрирование Redis
+- **Elasticsearch** - хранилище для APM данных
+- **Kibana** - визуализация метрик и ошибок APM
+- **APM Server** - сбор и обработка данных мониторинга
 - **Docker** - контейнеризация
 
 ### Инструменты разработки
@@ -63,11 +67,25 @@ PGADMIN_PORT=5050
 REDIS_HOST=redis
 REDIS_PORT=6379
 REDISINSIGHT_PORT=5540
+
+# Elastic APM configuration
+ELASTIC_APM_SERVER_URL=http://apm-server:8200
+ELASTIC_APM_SERVICE_NAME=url-shortener
+ELASTIC_APM_DEBUG=false
+ELASTIC_APM_ENVIRONMENT=prod
+ELASTIC_APM_CAPTURE_BODY=all
+ELASTIC_APM_CAPTURE_HEADERS=true
+ELASTIC_APM_USE_ELASTIC_EXCEPTHOOK=true
+ELASTIC_APM_CAPTURE_EXCEPTIONS=true
 ```
 
 2. Запустите приложение:
 ```bash
+# Запуск только приложения и хранилищ
 make all
+
+# Запуск приложения с мониторингом (Elasticsearch, Kibana, APM Server)
+make all-with-monitoring
 ```
 
 3. Примените миграции:
@@ -146,10 +164,52 @@ make test
 - **Infrastructure** - репозитории, модели БД
 - **Presentation** - API endpoints
 
+## Мониторинг и APM
+
+Приложение интегрировано с **Elastic APM** для мониторинга производительности и отслеживания ошибок.
+
+### Возможности мониторинга
+
+- **Трассировка запросов** - отслеживание времени выполнения запросов и их компонентов (app, PostgreSQL, Redis)
+- **Отслеживание ошибок** - автоматическая отправка всех исключений (DomainException, HTTPException 4xx/5xx, необработанные исключения) в APM
+- **Метрики производительности** - мониторинг транзакций, задержек, throughput
+- **Визуализация в Kibana** - дашборды для анализа производительности и ошибок
+
+### Доступ к мониторингу
+
+После запуска с мониторингом (`make all-with-monitoring`):
+
+- **Kibana APM**: `http://localhost:5601` → перейдите в раздел APM
+- **Elasticsearch**: `http://localhost:9200`
+- **APM Server**: `http://localhost:8200`
+
+### Просмотр ошибок
+
+Все ошибки автоматически отправляются в APM и отображаются во вкладке **Errors** в Kibana:
+- HTTP 4xx ошибки (валидация, неверные запросы)
+- HTTP 5xx ошибки (серверные ошибки)
+- Доменные исключения (DomainException)
+- Необработанные исключения
+
+Ошибки также видны в разделе **Transactions** с фильтром по статус-кодам.
+
 ## Команды Makefile
 
-- `make all` - запуск всех сервисов
-- `make all-down` - остановка всех сервисов
+### Основные команды
+- `make all` - запуск приложения и хранилищ
+- `make all-down` - остановка приложения и хранилищ
+- `make all-with-monitoring` - запуск приложения с мониторингом
+- `make all-with-monitoring-down` - остановка приложения и мониторинга
+
+### Тестирование и миграции
 - `make test` - запуск тестов
 - `make migrate` - применение миграций
 - `make migrations` - создание новой миграции
+
+### Мониторинг
+- `make monitoring` - запуск только мониторинга
+- `make monitoring-down` - остановка мониторинга
+- `make monitoring-logs` - логи мониторинга
+- `make elasticsearch-logs` - логи Elasticsearch
+- `make apm-logs` - логи APM Server
+- `make kibana-logs` - логи Kibana
