@@ -165,7 +165,7 @@ make test
 - **Infrastructure** - репозитории, модели БД
 - **Presentation** - API endpoints
 
-## Мониторинг и APM
+## Мониторинг
 
 Приложение интегрировано с **Elastic APM** для мониторинга производительности и отслеживания ошибок.
 
@@ -185,7 +185,7 @@ make test
 
 После запуска с мониторингом (`make all-with-monitoring`):
 
-- **Kibana APM**: `http://localhost:5601` → перейдите в раздел APM
+- **Kibana**: `http://localhost:5601` → перейдите в раздел APM
 - **Elasticsearch**: `http://localhost:9200`
 - **APM Server**: `http://localhost:8200`
 
