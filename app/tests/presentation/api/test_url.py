@@ -8,6 +8,8 @@ import pytest
 from faker import Faker
 from httpx import Response
 
+from domain.value_objects.url import MAX_URL_LENGTH
+
 
 @pytest.mark.asyncio
 async def test_create_short_url_success(
@@ -86,4 +88,77 @@ async def test_get_long_url_not_found(
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     json_response = response.json()
-    assert "detail" in json_response
+    assert "errors" in json_response
+    assert isinstance(json_response["errors"], list)
+    assert len(json_response["errors"]) > 0
+
+
+@pytest.mark.asyncio
+async def test_create_short_url_invalid_empty_url(
+    app: FastAPI,
+    client: TestClient,
+):
+    """Test that empty URL returns 400 Bad Request."""
+    url = app.url_path_for("create_short_url")
+    response: Response = client.post(url=url, json={"long_url": ""})
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    json_response = response.json()
+    assert "errors" in json_response
+    assert isinstance(json_response["errors"], list)
+    assert len(json_response["errors"]) > 0
+    error_message = json_response["errors"][0].lower()
+    assert "empty" in error_message or "cannot be empty" in error_message
+
+
+@pytest.mark.asyncio
+async def test_create_short_url_invalid_url_no_scheme(
+    app: FastAPI,
+    client: TestClient,
+):
+    """Test that URL without scheme returns 400 Bad Request."""
+    url = app.url_path_for("create_short_url")
+    response: Response = client.post(url=url, json={"long_url": "example.com"})
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    json_response = response.json()
+    assert "errors" in json_response
+    assert isinstance(json_response["errors"], list)
+    assert len(json_response["errors"]) > 0
+    assert "scheme" in json_response["errors"][0].lower()
+
+
+@pytest.mark.asyncio
+async def test_create_short_url_invalid_url_unsupported_scheme(
+    app: FastAPI,
+    client: TestClient,
+):
+    """Test that URL with unsupported scheme returns 400 Bad Request."""
+    url = app.url_path_for("create_short_url")
+    response: Response = client.post(url=url, json={"long_url": "ftp://example.com"})
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    json_response = response.json()
+    assert "errors" in json_response
+    assert isinstance(json_response["errors"], list)
+    assert len(json_response["errors"]) > 0
+    error_message = json_response["errors"][0].lower()
+    assert "unsupported" in error_message or "only http and https" in error_message
+
+
+@pytest.mark.asyncio
+async def test_create_short_url_invalid_url_too_long(
+    app: FastAPI,
+    client: TestClient,
+):
+    """Test that URL exceeding max length returns 400 Bad Request."""
+    url = app.url_path_for("create_short_url")
+    long_url = "https://example.com/" + "a" * (MAX_URL_LENGTH + 1)
+    response: Response = client.post(url=url, json={"long_url": long_url})
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    json_response = response.json()
+    assert "errors" in json_response
+    assert isinstance(json_response["errors"], list)
+    assert len(json_response["errors"]) > 0
+    assert "too long" in json_response["errors"][0].lower()

@@ -25,7 +25,7 @@ class ComposedURLRepository(BaseURLRepository):
         await self.db_session.commit()
 
         # Добавляем в кэш
-        await self.cache.set(url_pair.short_url, url_pair.long_url)
+        await self.cache.set(model.short_url, model.long_url)
 
     async def get_by_short_url(self, short_url: str) -> str | None:
         cached_long_url = await self.cache.get(short_url)

@@ -1,7 +1,6 @@
 from fastapi import (
     APIRouter,
     Depends,
-    HTTPException,
     status,
 )
 
@@ -9,7 +8,6 @@ from application.commands.url import CreateShortURLCommand
 from application.init import init_container
 from application.mediator import Mediator
 from application.queries.url import GetLongURLQuery
-from domain.exceptions.url import LongURLNotFoundException
 from presentation.api.schemas import ApiResponse
 from presentation.api.v1.url.schemas import (
     CreateShortURLRequestSchema,
@@ -37,18 +35,12 @@ async def create_short_url(
     mediator: Mediator = container.resolve(Mediator)
     command = CreateShortURLCommand(long_url=request.long_url)
 
-    try:
-        results = await mediator.handle_command(command)
-        short_url = results[0]
+    results = await mediator.handle_command(command)
+    short_url = results[0]
 
-        return ApiResponse[CreateShortURLResponseSchema](
-            data=CreateShortURLResponseSchema(short_url=short_url),
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
-        )
+    return ApiResponse[CreateShortURLResponseSchema](
+        data=CreateShortURLResponseSchema(short_url=short_url),
+    )
 
 
 @router.get(
@@ -67,19 +59,8 @@ async def get_long_url(
     mediator: Mediator = container.resolve(Mediator)
     query = GetLongURLQuery(short_url=short_url)
 
-    try:
-        long_url = await mediator.handle_query(query)
+    long_url = await mediator.handle_query(query)
 
-        return ApiResponse[GetLongURLResponseSchema](
-            data=GetLongURLResponseSchema(long_url=long_url),
-        )
-    except LongURLNotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=e.message,
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
-        )
+    return ApiResponse[GetLongURLResponseSchema](
+        data=GetLongURLResponseSchema(long_url=long_url),
+    )

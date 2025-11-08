@@ -6,6 +6,7 @@ import base62
 from domain.entities.url import URLEntity
 from domain.exceptions.url import LongURLNotFoundException
 from domain.interfaces.repositories.url import BaseURLRepository
+from domain.value_objects.url import LongURLValueObject
 
 
 @dataclass
@@ -28,7 +29,7 @@ class URLService:
 
         new_pair = URLEntity(
             id=new_id,
-            long_url=long_url,
+            long_url=LongURLValueObject(value=long_url),
             short_url=short_url,
         )
 

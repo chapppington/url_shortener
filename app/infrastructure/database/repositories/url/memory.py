@@ -19,7 +19,7 @@ class DummyInMemoryURLRepository(BaseURLRepository):
             entity = next(
                 entity for entity in self._url_pairs if entity.short_url == short_url
             )
-            return entity.long_url
+            return entity.long_url.as_generic_type()
         except StopIteration:
             return None
 
@@ -28,7 +28,7 @@ class DummyInMemoryURLRepository(BaseURLRepository):
             return next(
                 url_pair
                 for url_pair in self._url_pairs
-                if url_pair.long_url == long_url
+                if url_pair.long_url.value == long_url
             )
         except StopIteration:
             return None
