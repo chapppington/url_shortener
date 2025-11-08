@@ -18,5 +18,5 @@ def create_app() -> FastAPI:
     setup_exception_handlers(app)
 
     app.include_router(healthcheck_router)
-    app.include_router(v1_router)
+    app.include_router(v1_router, prefix="/api/v1")
     return app
