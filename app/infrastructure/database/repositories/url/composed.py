@@ -19,13 +19,17 @@ class ComposedURLRepository(BaseURLRepository):
     cache: Redis
 
     async def add(self, url_pair: URLEntity) -> None:
+        # Сохраняем значения до commit, чтобы избежать lazy loading после detach
+        short_url = url_pair.short_url
+        long_url = url_pair.long_url.as_generic_type()
+
         # Добавляем в бд
         model = convert_url_entity_to_model(url_pair)
         self.db_session.add(model)
         await self.db_session.commit()
 
         # Добавляем в кэш
-        await self.cache.set(model.short_url, model.long_url)
+        await self.cache.set(short_url, long_url)
 
     async def get_by_short_url(self, short_url: str) -> str | None:
         cached_long_url = await self.cache.get(short_url)
@@ -38,8 +42,10 @@ class ComposedURLRepository(BaseURLRepository):
         model = result.scalar_one_or_none()
 
         if model:
-            await self.cache.set(short_url, model.long_url)
-            return model.long_url
+            # Используем прямое обращение к атрибуту, так как модель уже загружена
+            long_url = model.long_url
+            await self.cache.set(short_url, long_url)
+            return long_url
 
         return None
 

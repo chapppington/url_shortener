@@ -184,3 +184,37 @@ def test_long_url_value_object_invalid_url_format():
     for url in invalid_urls:
         with pytest.raises(InvalidURLError):
             LongURLValueObject(value=url)
+
+
+def test_long_url_value_object_invalid_domain():
+    """Test that URLs with invalid domain format raise InvalidURLError."""
+    invalid_domains = [
+        "https://abobus",
+        "https://invalid",
+        "http://nodot",
+        "https://123",
+    ]
+
+    for url in invalid_domains:
+        with pytest.raises(InvalidURLError) as exc_info:
+            LongURLValueObject(value=url)
+        assert (
+            "domain" in exc_info.value.message.lower()
+            or "hostname" in exc_info.value.message.lower()
+        )
+
+
+def test_long_url_value_object_valid_domains():
+    """Test that URLs with valid domains are accepted."""
+    valid_urls = [
+        "https://example.com",
+        "http://subdomain.example.com",
+        "https://localhost",
+        "http://127.0.0.1",
+        "https://192.168.1.1",
+        "http://example.com:8080",
+    ]
+
+    for url in valid_urls:
+        value_object = LongURLValueObject(value=url)
+        assert value_object.value == url

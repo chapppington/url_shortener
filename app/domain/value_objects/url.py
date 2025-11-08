@@ -1,4 +1,9 @@
+import re
 from dataclasses import dataclass
+from ipaddress import (
+    AddressValueError,
+    ip_address,
+)
 from urllib.parse import urlparse
 
 from domain.exceptions.url import (
@@ -36,10 +41,41 @@ class LongURLValueObject(BaseValueObject[str]):
             )
 
         # URL must have a netloc (domain) - check both empty and whitespace-only
-        if not parsed.netloc or not parsed.netloc.strip():
+        netloc = parsed.netloc.strip() if parsed.netloc else ""
+        if not netloc:
             raise InvalidURLError(
                 url=self.value,
                 reason="URL must include a domain (e.g., example.com)",
+            )
+
+        # Validate domain format
+        # Remove port if present (e.g., example.com:8080 -> example.com)
+        domain = netloc.split(":")[0]
+
+        # Check if it's localhost (allowed)
+        is_localhost = domain.lower() in ("localhost", "127.0.0.1", "::1")
+
+        # Check if it's a valid IP address (allowed)
+        is_ip = False
+        try:
+            ip_address(domain)
+            is_ip = True
+        except (ValueError, AddressValueError):
+            pass
+
+        # Check if it's a valid domain name (must contain at least one dot for TLD)
+        # Domain pattern: alphanumeric, hyphens, dots, must have at least one dot
+        is_valid_domain = bool(
+            re.match(
+                r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$",
+                domain,
+            ),
+        )
+
+        if not (is_localhost or is_ip or is_valid_domain):
+            raise InvalidURLError(
+                url=self.value,
+                reason=f"Invalid domain format '{domain}'. Domain must be a valid hostname (e.g., example.com), IP address, or localhost",
             )
 
         # Scheme must be http or https
