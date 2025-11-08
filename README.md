@@ -2,7 +2,8 @@
 
 REST API для сокращения URL, построенное на принципах Domain-Driven Design.
 
-<img width="1512" height="484" alt="Снимок экрана 2025-11-08 в 09 57 40" src="https://github.com/user-attachments/assets/6b8eddb7-f10f-4e51-b5d6-d07805906a28" />
+<img width="1464" height="445" alt="Снимок экрана 2025-11-08 в 10 03 00" src="https://github.com/user-attachments/assets/e477d742-762f-419f-9186-71bf29dfe4b0" />
+
 
 ## Описание
 
