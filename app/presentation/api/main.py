@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from presentation.api.exception_handlers import setup_exception_handlers
 from presentation.api.healthcheck import healthcheck_router
+from presentation.api.middleware.apm import setup_apm_middleware
 from presentation.api.v1 import v1_router
 
 
@@ -13,6 +14,7 @@ def create_app() -> FastAPI:
         debug=True,
     )
 
+    setup_apm_middleware(app)
     setup_exception_handlers(app)
 
     app.include_router(healthcheck_router)

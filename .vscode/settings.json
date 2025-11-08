@@ -33,6 +33,7 @@
     "cursorignore",
     "dbdata",
     "docformatter",
+    "elasticapm",
     "gensalt",
     "hashpw",
     "healthcheck",

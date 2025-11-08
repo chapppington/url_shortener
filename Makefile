@@ -6,6 +6,7 @@ ENV = --env-file .env
 EXEC = docker exec -it
 APP_FILE = docker_compose/app.yaml
 APP_CONTAINER = main-app
+MONITORING_FILE = docker_compose/monitoring.yaml
 
 .PHONY: all
 all:
@@ -14,6 +15,16 @@ all:
 .PHONY: all-down
 all-down:
 	${DC} -f ${STORAGES_FILE} -f ${APP_FILE} ${ENV} down
+
+.PHONY: all-with-monitoring
+all-with-monitoring:
+	${DC} -f ${MONITORING_FILE} ${ENV} up -d
+	${DC} -f ${STORAGES_FILE} -f ${APP_FILE} ${ENV} up --build -d
+
+.PHONY: all-with-monitoring-down
+all-with-monitoring-down:
+	${DC} -f ${STORAGES_FILE} -f ${APP_FILE} ${ENV} down
+	${DC} -f ${MONITORING_FILE} ${ENV} down
 
 .PHONY: app-logs
 app-logs:
@@ -58,3 +69,31 @@ migrate:
 .PHONY: test 
 test:
 	${EXEC} ${APP_CONTAINER} pytest
+
+.PHONY: monitoring
+monitoring:
+	${DC} -f ${MONITORING_FILE} ${ENV} up -d
+
+.PHONY: monitoring-down
+monitoring-down:
+	${DC} -f ${MONITORING_FILE} ${ENV} down
+
+.PHONY: monitoring-logs
+monitoring-logs:
+	${DC} -f ${MONITORING_FILE} logs -f
+
+.PHONY: elasticsearch-logs
+elasticsearch-logs:
+	${LOGS} elasticsearch -f
+
+.PHONY: apm-logs
+apm-logs:
+	${LOGS} apm-server -f
+
+.PHONY: kibana-logs
+kibana-logs:
+	${LOGS} kibana -f
+
+.PHONY: monitoring-restart
+monitoring-restart:
+	${DC} -f ${MONITORING_FILE} restart
