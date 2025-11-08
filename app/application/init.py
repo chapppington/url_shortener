@@ -36,23 +36,7 @@ def _init_container() -> Container:
 
     container.register(Config, instance=Config(), scope=Scope.singleton)
 
-    def init_mediator():
-        mediator = Mediator()
-        url_service: URLService = container.resolve(URLService)
-
-        command_handler = CreateShortURLCommandHandler(url_service=url_service)
-        query_handler = GetLongURLQueryHandler(url_service=url_service)
-
-        mediator.register_command(
-            CreateShortURLCommand,
-            [command_handler],
-        )
-        mediator.register_query(
-            GetLongURLQuery,
-            query_handler,
-        )
-
-        return mediator
+    container.register(URLService, scope=Scope.singleton)
 
     def init_url_repository():
         config: Config = container.resolve(Config)
@@ -78,7 +62,22 @@ def _init_container() -> Container:
         scope=Scope.singleton,
     )
 
-    container.register(URLService, scope=Scope.singleton)
+    container.register(CreateShortURLCommandHandler)
+    container.register(GetLongURLQueryHandler)
+
+    def init_mediator():
+        mediator = Mediator()
+
+        mediator.register_command(
+            CreateShortURLCommand,
+            [container.resolve(CreateShortURLCommandHandler)],
+        )
+        mediator.register_query(
+            GetLongURLQuery,
+            container.resolve(GetLongURLQueryHandler),
+        )
+
+        return mediator
 
     container.register(Mediator, factory=init_mediator)
 
