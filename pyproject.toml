@@ -61,6 +61,7 @@ skip_glob=[
     ".vscode",
     "venv",
     ".venv",
+    "**/migrations/**",
 ]
 known_fastapi=["fastapi","starlette"]
 known_first_party=["presentation","domain","infrastructure","application","settings","tests"]
