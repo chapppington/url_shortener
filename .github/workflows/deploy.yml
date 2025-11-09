@@ -42,11 +42,11 @@ jobs:
 
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-ansi
+        run: poetry install --no-interaction --no-ansi --no
 
       - name: Install linting tools
         run: |
-          poetry run pip install ruff isort
+          poetry add ruff isort
 
       - name: Run ruff check
         run: poetry run ruff check app/ --line-length 120
@@ -86,7 +86,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-ansi
+        run: poetry install --no-interaction --no-ansi --no-root
 
       - name: Run tests
         env:
