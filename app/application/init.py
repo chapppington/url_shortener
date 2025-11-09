@@ -36,30 +36,41 @@ def _init_container() -> Container:
 
     container.register(Config, instance=Config(), scope=Scope.singleton)
 
-    container.register(URLService, scope=Scope.singleton)
+    container.register(URLService)  # убрал тут синглтон
 
-    def init_url_repository():
+    # один раз создаём async_sessionmaker
+    def init_async_sessionmaker():
         config: Config = container.resolve(Config)
+        engine = create_async_engine(config.postgres_connection_uri, echo=False)
+        return async_sessionmaker[AsyncSession](bind=engine, expire_on_commit=False)
 
-        # PostgreSQL session
-        async_engine = create_async_engine(config.postgres_connection_uri, echo=True)
-        async_session_factory = async_sessionmaker[AsyncSession](bind=async_engine)
+    container.register(
+        async_sessionmaker,
+        factory=init_async_sessionmaker,
+        scope=Scope.singleton,
+    )
 
-        postgres_session = async_session_factory()
-
-        # Redis client
-        redis_client = Redis(
+    # один раз создаём redis клиент
+    def init_redis_client():
+        config: Config = container.resolve(Config)
+        return Redis(
             host=config.redis_host,
             port=config.redis_port,
             decode_responses=True,
         )
 
-        return ComposedURLRepository(db_session=postgres_session, cache=redis_client)
+    container.register(Redis, factory=init_redis_client, scope=Scope.singleton)
+
+    def init_url_repository():
+        sessionmaker: async_sessionmaker[AsyncSession] = container.resolve(
+            async_sessionmaker,
+        )
+        redis_client = container.resolve(Redis)
+        return ComposedURLRepository(sessionmaker=sessionmaker, cache=redis_client)
 
     container.register(
         BaseURLRepository,
-        factory=init_url_repository,
-        scope=Scope.singleton,
+        factory=init_url_repository,  # убрал тут синглтон
     )
 
     container.register(CreateShortURLCommandHandler)
@@ -79,6 +90,10 @@ def _init_container() -> Container:
 
         return mediator
 
-    container.register(Mediator, factory=init_mediator)
+    container.register(
+        Mediator,
+        factory=init_mediator,
+        scope=Scope.singleton,
+    )  # тут добавил синглтон
 
     return container
