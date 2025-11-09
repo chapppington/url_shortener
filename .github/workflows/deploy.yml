@@ -49,13 +49,13 @@ jobs:
           poetry add ruff isort
 
       - name: Run ruff check
-        run: poetry run ruff check app/ --line-length 120
+        run: poetry run ruff check app/ --config pyproject.toml
 
       - name: Run ruff format check
-        run: poetry run ruff format --check app/ --line-length 120
+        run: poetry run ruff format --check app/ --config pyproject.toml
 
       - name: Run isort check
-        run: poetry run isort --check-only app/ --line-length 120
+        run: poetry run isort --check-only app/ --settings-file pyproject.toml
 
   test:
     name: Run Tests
