@@ -198,6 +198,174 @@ make test
 
 Ошибки также видны в разделе **Transactions** с фильтром по статус-кодам.
 
+## Деплой на VPS
+
+Проект настроен для автоматического деплоя на VPS через GitHub Actions.
+
+### Настройка GitHub Secrets
+
+Для работы автоматического деплоя необходимо настроить следующие секреты в GitHub:
+
+**Необходимые секреты:**
+- `VPS_SSH_PRIVATE_KEY` - приватный SSH ключ для доступа к VPS
+- `VPS_HOST` - IP адрес или домен VPS сервера
+- `VPS_USER` - имя пользователя для SSH подключения (обычно `root` или `ubuntu`)
+- `VPS_APP_DIR` - путь к директории проекта на сервере (например, `/opt/url_shortener`)
+- `VPS_APP_URL` - (опционально) URL приложения для health check (например, `http://your-domain.com`)
+
+**Подробные инструкции по настройке SSH ключа и добавлению секретов см. ниже в разделе "Подготовка VPS сервера" (шаги 2 и 5).**
+
+### Подготовка VPS сервера
+
+1. **Установите необходимые зависимости:**
+   ```bash
+   # Обновление системы
+   sudo apt update && sudo apt upgrade -y
+   
+   # Установка Docker и Docker Compose
+   curl -fsSL https://get.docker.com -o get-docker.sh
+   sudo sh get-docker.sh
+   sudo apt install docker-compose-plugin -y
+   
+   # Установка Git
+   sudo apt install git -y
+   ```
+
+2. **Настройте SSH ключ для GitHub Actions:**
+   
+   **Шаг 1: Создайте SSH ключ (на вашей локальной машине)**
+   ```bash
+   # Сгенерируйте новый SSH ключ специально для GitHub Actions
+   ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/github_actions_deploy
+   
+   # Или используйте существующий ключ (если у вас уже есть SSH ключ для VPS)
+   # В этом случае пропустите этот шаг
+   ```
+   
+   **Шаг 2: Скопируйте публичный ключ на VPS сервер**
+   ```bash
+   # Если создали новый ключ
+   ssh-copy-id -i ~/.ssh/github_actions_deploy.pub user@your-vps-ip
+   
+   # Или если используете существующий ключ
+   ssh-copy-id user@your-vps-ip
+   
+   # Проверьте подключение
+   ssh -i ~/.ssh/github_actions_deploy user@your-vps-ip
+   # или
+   ssh user@your-vps-ip
+   ```
+   
+   **Шаг 3: Скопируйте приватный ключ для GitHub Secrets**
+   ```bash
+   # Если создали новый ключ
+   cat ~/.ssh/github_actions_deploy
+   
+   # Или если используете существующий ключ (обычно ~/.ssh/id_ed25519 или ~/.ssh/id_rsa)
+   cat ~/.ssh/id_ed25519
+   # или
+   cat ~/.ssh/id_rsa
+   ```
+   
+   **Важно:** Скопируйте весь вывод команды (включая строки `-----BEGIN OPENSSH PRIVATE KEY-----` и `-----END OPENSSH PRIVATE KEY-----`)
+
+3. **Клонируйте репозиторий на сервер:**
+   ```bash
+   cd /opt
+   sudo git clone https://github.com/your-username/url_shortener.git
+   sudo chown -R $USER:$USER url_shortener
+   cd url_shortener
+   ```
+
+4. **Создайте файл `.env` на сервере:**
+   ```bash
+   # Скопируйте пример .env и отредактируйте под продакшн
+   cp .env.example .env
+   nano .env
+   ```
+   
+   Обновите переменные для продакшн окружения:
+   ```env
+   API_PORT=8000
+   POSTGRES_HOST=postgres
+   POSTGRES_PORT=5432
+   # ... остальные переменные
+   ```
+
+5. **Добавьте SSH ключ в GitHub Secrets:**
+   
+   **Шаг 1: Откройте настройки репозитория в GitHub**
+   - Перейдите в ваш репозиторий на GitHub
+   - Нажмите на **Settings** (в верхней панели)
+   - В левом меню выберите **Secrets and variables** → **Actions**
+   
+   **Шаг 2: Добавьте секреты**
+   
+   Нажмите **New repository secret** и добавьте каждый секрет:
+   
+   - **Name:** `VPS_SSH_PRIVATE_KEY`
+     **Value:** Вставьте весь приватный ключ (который вы скопировали на шаге 2.3)
+     - Должен начинаться с `-----BEGIN OPENSSH PRIVATE KEY-----`
+     - И заканчиваться на `-----END OPENSSH PRIVATE KEY-----`
+     - Включая все строки между ними
+   
+   - **Name:** `VPS_HOST`
+     **Value:** IP адрес или домен вашего VPS (например, `123.45.67.89` или `example.com`)
+   
+   - **Name:** `VPS_USER`
+     **Value:** Имя пользователя для SSH (обычно `root`, `ubuntu`, или `debian`)
+   
+   - **Name:** `VPS_APP_DIR`
+     **Value:** Путь к директории проекта на сервере (например, `/opt/url_shortener`)
+   
+   - **Name:** `VPS_APP_URL` (опционально)
+     **Value:** URL вашего приложения для health check (например, `http://your-domain.com` или `https://api.example.com`)
+   
+   **Важно:** После добавления секретов они будут зашифрованы и их нельзя будет просмотреть. Убедитесь, что сохранили значения где-то безопасно.
+
+### Автоматический деплой
+
+После настройки, деплой будет автоматически запускаться при:
+- Push в ветку `master` или `main`
+- Ручном запуске через GitHub Actions (Actions → Deploy to VPS → Run workflow)
+
+**Важно:** Перед деплоем автоматически выполняются проверки:
+1. **Линтинг кода** - проверка стиля кода с помощью `ruff` и `isort`
+2. **Тесты** - запуск всех тестов через `pytest`
+
+Деплой на VPS произойдет **только если** все проверки пройдут успешно. Это гарантирует, что на продакшн попадает только проверенный код.
+
+### Ручной деплой
+
+Для ручного деплоя можно использовать скрипт `deploy.sh`:
+
+```bash
+# На сервере
+cd /opt/url_shortener
+./deploy.sh master
+```
+
+### Что делает деплой
+
+1. Обновляет код из репозитория
+2. Останавливает старые контейнеры
+3. Собирает новые Docker образы
+4. Запускает контейнеры
+5. Применяет миграции базы данных
+6. Очищает неиспользуемые Docker образы
+7. Проверяет статус контейнеров
+
+### Откат к предыдущей версии
+
+Если нужно откатиться к предыдущей версии:
+
+```bash
+cd /opt/url_shortener
+git log --oneline  # найти нужный коммит
+git reset --hard <commit-hash>
+./deploy.sh
+```
+
 ## Команды Makefile
 
 ### Основные команды
