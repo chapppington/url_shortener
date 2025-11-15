@@ -14,7 +14,7 @@ from infrastructure.database.models.url import URLModel
 
 
 @dataclass
-class ComposedURLRepository(BaseURLRepository):
+class SQLAlchemyRedisURLRepository(BaseURLRepository):
     database: Database
     cache: Redis
 

@@ -18,7 +18,7 @@ from application.queries.url import (
 from domain.interfaces.repositories.url import BaseURLRepository
 from domain.services.url import URLService
 from infrastructure.database.gateways.postgres import Database
-from infrastructure.database.repositories.url.composed import ComposedURLRepository
+from infrastructure.database.repositories.url import SQLAlchemyRedisURLRepository
 from settings.config import Config
 
 
@@ -51,7 +51,7 @@ def _init_container() -> Container:
 
     container.register(Redis, factory=init_redis, scope=Scope.singleton)
 
-    container.register(BaseURLRepository, ComposedURLRepository)
+    container.register(BaseURLRepository, SQLAlchemyRedisURLRepository)
 
     container.register(URLService)
 
